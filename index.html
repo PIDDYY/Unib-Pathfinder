@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNIB PathFinder</title>
+    <meta name="description" content="Navigasi kampus Universitas Bengkulu – jalur tercepat berbasis AI.">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <div class="logo-icon"><i class="fa-solid fa-route"></i></div>
+            <span class="logo-text">UNIB <strong>PathFinder</strong></span>
+        </div>
+        <button id="themeToggle" class="icon-btn" title="Ganti Tema">
+            <i class="fa-solid fa-moon"></i>
+        </button>
+    </nav>
+
+    <div class="layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+
+            <!-- Filter Chips -->
+            <div class="filters" id="filterChips">
+                <button class="chip active" data-cat="">Semua</button>
+                <button class="chip" data-cat="gerbang">Gerbang</button>
+                <button class="chip" data-cat="akademik">Akademik</button>
+                <button class="chip" data-cat="fasilitas">Fasilitas</button>
+                <button class="chip" data-cat="ibadah">Ibadah</button>
+                <button class="chip" data-cat="olahraga">Olahraga</button>
+                <button class="chip" data-cat="kesehatan">Kesehatan</button>
+                <button class="chip" data-cat="layanan">Layanan</button>
+            </div>
+
+            <!-- Status Jam & Gerbang -->
+            <div id="gateStatus" class="gate-status">
+                <span id="statusDot" class="gate-dot"></span>
+                <span id="statusText">Memuat...</span>
+                <span id="statusClock" class="gate-clock"></span>
+            </div>
+
+            <p class="sidebar-label">Dari mana?</p>
+            <div class="field">
+                <i class="fa-solid fa-circle-dot icon-green"></i>
+                <input type="text" id="startSearch" class="input" placeholder="Pilih lokasi awal..." autocomplete="off">
+                <button id="clearStart" class="clear-btn hidden" title="Hapus">&#x2715;</button>
+                <div id="startDropdown" class="dropdown"></div>
+            </div>
+
+            <div class="swap-row">
+                <div class="line"></div>
+                <button id="btnSwap" class="swap-btn" title="Tukar">
+                    <i class="fa-solid fa-arrows-up-down"></i>
+                </button>
+                <div class="line"></div>
+            </div>
+
+            <p class="sidebar-label">Ke mana?</p>
+            <div class="field">
+                <i class="fa-solid fa-location-pin icon-red"></i>
+                <input type="text" id="endSearch" class="input" placeholder="Pilih tujuan..." autocomplete="off">
+                <button id="clearEnd" class="clear-btn hidden" title="Hapus">&#x2715;</button>
+                <div id="endDropdown" class="dropdown"></div>
+            </div>
+
+            <input type="hidden" id="startNode">
+            <input type="hidden" id="endNode">
+
+            <!-- Pilih Kendaraan -->
+            <p class="sidebar-label" style="margin-top:0.6rem">Kendaraan</p>
+            <div class="transport-row" id="transportRow">
+                <button class="transport-btn active" data-profile="foot">
+                    <i class="fa-solid fa-person-walking"></i>
+                    <span>Jalan Kaki</span>
+                </button>
+                <button class="transport-btn" data-profile="bike">
+                    <i class="fa-solid fa-bicycle"></i>
+                    <span>Sepeda</span>
+                </button>
+                <button class="transport-btn" data-profile="motor">
+                    <i class="fa-solid fa-motorcycle"></i>
+                    <span>Motor</span>
+                </button>
+                <button class="transport-btn" data-profile="car">
+                    <i class="fa-solid fa-car"></i>
+                    <span>Mobil</span>
+                </button>
+            </div>
+
+            <div class="actions">
+                <button id="btnFindRoute" class="btn-primary">
+                    <i class="fa-solid fa-route"></i> Cari Jalur
+                </button>
+                <button id="btnReset" class="btn-ghost" title="Reset">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Result -->
+            <div id="routeInfo" class="result hidden">
+                <div class="result-row">
+                    <div class="result-item">
+                        <span id="distValue" class="result-val">—</span>
+                        <span class="result-lbl">Jarak</span>
+                    </div>
+                    <div class="divider-v"></div>
+                    <div class="result-item">
+                        <span id="timeValue" class="result-val">—</span>
+                        <span class="result-lbl">Waktu</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Path Result -->
+            <div id="aiResult" class="ai-result hidden">
+                <div class="ai-result-label">
+                    <i class="fa-solid fa-route"></i> Jalur Terpendek
+                </div>
+                <div id="aiPathDisplay" class="ai-path-nodes"></div>
+                <div id="aiDistDisplay" class="ai-dist"></div>
+            </div>
+
+            <!-- Legend -->
+            <div class="legend">
+                <div class="leg"><span class="dot" style="background:#16a34a"></span>Gerbang</div>
+                <div class="leg"><span class="dot" style="background:#2563eb"></span>Akademik</div>
+                <div class="leg"><span class="dot" style="background:#d97706"></span>Fasilitas</div>
+                <div class="leg"><span class="dot" style="background:#dc2626"></span>Ibadah</div>
+            </div>
+
+        </aside>
+
+        <!-- Map -->
+        <div class="map-wrap">
+            <div id="map"></div>
+
+            <div id="loadingOverlay" class="loading hidden">
+                <div class="spinner"></div>
+                <span>Menghitung rute...</span>
+            </div>
+
+            <!-- FAB group: tidak bentrok dengan zoom control -->
+            <div class="fab-group">
+                <button id="btnGPS" class="fab" title="Gunakan lokasi saya sebagai titik awal">
+                    <i class="fa-solid fa-location-crosshairs"></i>
+                    <span class="fab-label">Dari Sini</span>
+                </button>
+                <button id="btnRecenter" class="fab fab-sm" title="Kembali ke tengah kampus">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
