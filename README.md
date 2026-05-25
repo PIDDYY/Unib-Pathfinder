@@ -62,7 +62,6 @@ Untuk penjelasan lebih detail dan matematis yang bisa dimasukkan ke dalam lapora
 ├── 📄 index.html                       # Kerangka UI utama
 ├── 📄 style.css                        # Aturan desain dan styling UI (Ultra Minimalist)
 ├── 📄 script.js                        # Logika Utama Peta, Graph Nodes, dan Algoritma A*
-├── 📄 penjelasan_algoritma_astar.md    # Penjelasan ilmiah terkait AI A* di proyek ini
 ├── 📄 README.md                        # Dokumentasi ini
 └── 📁 image/                           # Foto dan aset visual untuk popup lokasi kampus
 ```
